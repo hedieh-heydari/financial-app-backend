@@ -3,6 +3,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // Load environment variables
 dotenv.config();
@@ -20,6 +21,7 @@ if (!process.env.JWT_SECRET) {
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Database Connection
 const connectDB = async () => {
@@ -35,9 +37,12 @@ const connectDB = async () => {
 connectDB();
 
 // Routes
-// const authRoutes = require('./src/routes/auth');
-// app.use('/api/auth', authRoutes);
+const authRoutes = require('./src/routes/auth');
+const userRoutes = require('./src/routes/userRoutes');
 
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Default route for server check
 app.get('/', (req, res) => {
