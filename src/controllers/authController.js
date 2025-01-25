@@ -154,7 +154,14 @@ exports.updateProfile = async (req, res) => {
       console.error('Error during profile update:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
-  };
-  
+};
+
+
+
+exports.logout = (req, res) => {
+  // No server-side action required for logout when using token expiration
+  console.log('Logout request received');
+  res.status(200).json({ message: 'Logout successful. Please remove the token on the client side.' });
+};
 
   
