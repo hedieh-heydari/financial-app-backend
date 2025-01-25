@@ -22,6 +22,7 @@ if (!process.env.JWT_SECRET) {
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use('/uploads', express.static('uploads') )
 
 // Database Connection
 const connectDB = async () => {
@@ -39,10 +40,12 @@ connectDB();
 // Routes
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/userRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes')
 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes)
 
 // Default route for server check
 app.get('/', (req, res) => {
