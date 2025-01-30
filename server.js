@@ -41,11 +41,15 @@ connectDB();
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/userRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes')
+const depositRoutes = require('./src/routes/depositRoutes');
+const withdrawalRoutes = require('./src/routes/withdrawalRoutes');
 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes)
+app.use('/api/deposits', depositRoutes);
+app.use('/api/withdrawals', withdrawalRoutes);
 
 // Default route for server check
 app.get('/', (req, res) => {
