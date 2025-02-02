@@ -126,9 +126,9 @@ exports.updateProfile = async (req, res) => {
       console.log('Invalid birthDate format:', birthDate);
       return res.status(400).json({ message: 'Invalid birthDate format. Use YYYY-MM-DD' });
     }
-    if (!/^\d{10}$/.test(mobile)) {
+    if (!/^\d{11}$/.test(mobile)) {
       console.log('Invalid mobile number:', mobile);
-      return res.status(400).json({ message: 'Mobile number must be 10 digits' });
+      return res.status(400).json({ message: 'Mobile number must be 11 digits' });
     }
   
     try {
