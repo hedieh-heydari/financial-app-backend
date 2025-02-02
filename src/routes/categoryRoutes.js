@@ -1,20 +1,22 @@
 const express = require("express");
 const {
-  getCategories,
   addCategory,
   updateCategory,
-  addCreditCardBox,
-  getCreditCardBoxes,
-  updateCreditCardBox,
+  getIncomeCategories,
+  getOutgoCategories,
+  addIncomeCategory,
+  addOutgoCategory,
+  updateIncomeCategory,
+  updateOutgoCategory,
 } = require("../controllers/categoryController");
 const router = express.Router();
-const upload = require('../utils/multerConfig');
+const upload = require("../utils/multerConfig");
 
-router.get("/:type", getCategories); // GET /api/categories/income or /api/categories/outgo
-router.post("/:type",  upload.single('logo'),addCategory); // POST /api/categories/income or /api/categories/outgo
-router.put("/:type/:id", upload.single('logo'), updateCategory); // PUT /api/categories/income/:id or /api/categories/outgo/:id
-router.get("/", getCreditCardBoxes); // GET /api/credit-card-boxes
-router.post("/", upload.single('logo'), addCreditCardBox); // POST /api/credit-card-boxes
-router.put("/:id", upload.single('logo'), updateCreditCardBox); // PUT /api/credit-card-boxes/:id
+router.get("/income", getIncomeCategories);
+router.get("/outgo", getOutgoCategories);
+router.post("/income", upload.single("logo"), addIncomeCategory); 
+router.post("/outgo", upload.single("logo"), addOutgoCategory);
+router.put("/income/:id", upload.single("logo"), updateIncomeCategory);
+router.put("/outgo/:id", upload.single("logo"), updateOutgoCategory);
 
 module.exports = router;
