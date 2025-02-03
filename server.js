@@ -44,7 +44,7 @@ const categoryRoutes = require('./src/routes/categoryRoutes')
 const depositRoutes = require('./src/routes/depositRoutes');
 const withdrawalRoutes = require('./src/routes/withdrawalRoutes');
 const creditBoxRoutes = require('./src/routes/creditCardBoxRoute')
-
+const dashboardRoute = require('./src/routes/dashboardRoute');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -52,6 +52,7 @@ app.use('/api/categories', categoryRoutes)
 app.use('/api/boxes', creditBoxRoutes)
 app.use('/api/deposits', depositRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
+app.use('/api/dashboard', dashboardRoute);
 
 // Default route for server check
 app.get('/', (req, res) => {
