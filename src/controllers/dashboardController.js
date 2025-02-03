@@ -85,7 +85,7 @@ exports.getTopWithdrawals = async (req, res) => {
     const withdrawals = await Withdrawal.aggregate([
       {
         $group: {
-          _id: "$description", // Group by description (category)
+          _id: "$toBox", // Group by description (category)
           totalAmount: { $sum: "$amount" },
         },
       },
