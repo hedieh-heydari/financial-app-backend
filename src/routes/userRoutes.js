@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUserDetails } = require('../controllers/userController'); // Adjust path if needed
+const { getUserDetails } = require('../controllers/userController'); 
 const router = express.Router();
 
 // Get user details by ID

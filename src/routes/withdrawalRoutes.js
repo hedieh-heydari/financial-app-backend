@@ -4,16 +4,12 @@ const { getWithdrawals, addWithdrawal, deleteWithdrawal, updateWithdrawal } = re
 const router = express.Router();
 
 
-// Get All Withdrawals
 router.get('/', getWithdrawals);
 
-// Create a New Withdrawal
 router.post('/', addWithdrawal);
 
-// Update an Existing Withdrawal
 router.put('/:id', updateWithdrawal);
 
-// Delete a Withdrawal
 router.delete('/:id', deleteWithdrawal);
 
 

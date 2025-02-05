@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, default: '' },
   birthDate: { type: Date, default: null },
   mobile: { type: String, default: '' },
-  completedProfile: { type: Boolean, default: false }, // Profile completion flag
+  completedProfile: { type: Boolean, default: false }, 
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

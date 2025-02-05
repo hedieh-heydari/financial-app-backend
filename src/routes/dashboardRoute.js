@@ -1,3 +1,4 @@
+// routes/dashboardRoutes.js
 const express = require("express");
 const {
   getTotalMoney,
@@ -15,4 +16,3 @@ router.get("/total-transactions", getTotalTransactions);
 router.get("/top-withdrawals", getTopWithdrawals);
 
 module.exports = router;
-

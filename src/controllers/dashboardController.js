@@ -1,17 +1,16 @@
 const { CreditCardBox } = require("../models/creditCardBoxModel");
 const Deposit = require("../models/depositModel");
 const Withdrawal = require("../models/widthrawalModel");
-const moment = require("moment-jalaali");
+const verifyToken = require("../controllers/tokenController"); 
 
-// Get Total Money from All Boxes
 exports.getTotalMoney = async (req, res) => {
   try {
-    // Fetch all boxes
-    const boxes = await CreditCardBox.find();
+    const token = req.headers.authorization?.split(' ')[1];
+    const userId = await verifyToken(token);
 
-    // Calculate the total sum of all box balances
+    const boxes = await CreditCardBox.find({ userId });
+
     const totalMoney = boxes.reduce((sum, box) => sum + box.initialAmount, 0);
-
     res.status(200).json({ totalMoney });
   } catch (error) {
     console.error("Error fetching total money:", error);
@@ -19,18 +18,19 @@ exports.getTotalMoney = async (req, res) => {
   }
 };
 
-//both desposits and withdrawals list
+
 exports.getAllTransactions = async (req, res) => {
   try {
-    // Fetch deposits and withdrawals
-    const deposits = await Deposit.find().populate("fromBox toBox");
-    const withdrawals = await Withdrawal.find().populate("fromBox toBox");
+    const token = req.headers.authorization?.split(' ')[1];
+    const userId = await verifyToken(token);
 
-    // Format transactions to a unified structure
+    const deposits = await Deposit.find({ userId }).populate("fromBox toBox");
+    const withdrawals = await Withdrawal.find({ userId }).populate("fromBox toBox");
+
     const formattedDeposits = deposits.map((deposit) => ({
       type: "deposit",
       amount: deposit.amount,
-      date: deposit.date.toISOString().split("T")[0], // Format date (YYYY-MM-DD)
+      date: deposit.date.toISOString().split("T")[0],
       fromBox: deposit.fromBox ? deposit.fromBox.name : "Cash",
       toBox: deposit.toBox ? deposit.toBox.name : "Unknown",
       description: deposit.description,
@@ -45,7 +45,6 @@ exports.getAllTransactions = async (req, res) => {
       description: withdrawal.description,
     }));
 
-    // Combine transactions and sort by date (Newest first)
     const transactions = [...formattedDeposits, ...formattedWithdrawals].sort(
       (a, b) => new Date(b.date) - new Date(a.date)
     );
@@ -59,58 +58,58 @@ exports.getAllTransactions = async (req, res) => {
 
 exports.getTotalTransactions = async (req, res) => {
   try {
-    // Sum of all deposit amounts
-    const depositResult = await Deposit.aggregate([
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]);
-    const totalDeposits = depositResult.length > 0 ? depositResult[0].total : 0;
+    const token = req.headers.authorization.split(' ')[1];
+    const userId = await verifyToken(token);
 
-    // Sum of all withdrawal amounts
-    const withdrawalResult = await Withdrawal.aggregate([
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]);
-    const totalWithdrawals =
-      withdrawalResult.length > 0 ? withdrawalResult[0].total : 0;
+    const deposits = await Deposit.find({ userId });
+    const totalDeposits = deposits.reduce((sum, deposit) => sum + deposit.amount, 0);
 
-    res.status(200).json({ totalDeposits, totalWithdrawals });
+
+
+    const withdrawals = await Withdrawal.find({ userId });
+    const totalWithdrawals = withdrawals.reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
+
+    res.status(200).json({
+      totalDeposits,
+      totalWithdrawals
+    });
   } catch (error) {
-    console.error("Error fetching total transactions:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Error fetching totals', error: error.message });
   }
 };
+
 
 exports.getTopWithdrawals = async (req, res) => {
   try {
-    // Aggregate withdrawals by name and sum amounts
-    const withdrawals = await Withdrawal.aggregate([
-      {
-        $group: {
-          _id: "$toBox", // Group by description (category)
-          totalAmount: { $sum: "$amount" },
-        },
-      },
-      { $sort: { totalAmount: -1 } }, // Sort by total amount (descending)
-      { $limit: 5 }, // Get top 5 withdrawals
-    ]);
+    const token = req.headers.authorization.split(' ')[1];
+    const userId = await verifyToken(token);
 
-    // Calculate total sum of all withdrawals
-    const totalWithdrawals = await Withdrawal.aggregate([
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]);
-    const totalSum =
-      totalWithdrawals.length > 0 ? totalWithdrawals[0].total : 1; // Avoid division by zero
+    const withdrawals = await Withdrawal.find({ userId });
 
-    // Format response with percentage calculation
-    const topWithdrawals = withdrawals.map((w) => ({
-      name: w._id,
-      amount: w.totalAmount,
-      percentage: parseFloat(((w.totalAmount / totalSum) * 100).toFixed(1)), // Round to 1 decimal
-    }));
+    const groupedWithdrawals = withdrawals.reduce((acc, withdrawal) => {
+      const toBox = withdrawal.toBox || 'Unknown'; 
+      if (!acc[toBox]) {
+        acc[toBox] = { totalAmount: 0, withdrawals: [] };
+      }
+      acc[toBox].totalAmount += withdrawal.amount;
+      acc[toBox].withdrawals.push(withdrawal);
+      return acc;
+    }, {});
 
-    res.status(200).json({ totalWithdrawals: totalSum, topWithdrawals });
+    const topWithdrawals = Object.entries(groupedWithdrawals)
+      .map(([toBox, { totalAmount, withdrawals }]) => ({
+        toBox,
+        totalAmount,
+        withdrawals: withdrawals
+      }))
+      .sort((a, b) => b.totalAmount - a.totalAmount) 
+      .slice(0, 5); 
+    res.status(200).json({
+      totalWithdrawals: withdrawals.reduce((acc, curr) => acc + curr.amount, 0),
+      topWithdrawals
+    });
   } catch (error) {
-    console.error("Error fetching top withdrawals:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching top withdrawals:', error);
+    res.status(500).json({ message: 'Error fetching top withdrawals', error: error.message });
   }
 };
-
