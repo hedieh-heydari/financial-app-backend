@@ -75,17 +75,19 @@ exports.updateDeposit = async (req, res) => {
 };
 
 exports.deleteDeposit = async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
   const { id } = req.params;
 
   try {
-    const token = req.headers.authorization?.split(' ')[1];
     const userId = await verifyToken(token);
-
     const deposit = await Deposit.findById(id);
     if (!deposit) return res.status(404).json({ message: 'سپرده پیدا نشد' });
     if (deposit.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'مجوز حذف این سپرده را ندارید' });
     }
+
+    await Deposit.findByIdAndDelete(id);
+
 
     const wallet = await Wallet.findOne();
     if (wallet) {
@@ -93,7 +95,7 @@ exports.deleteDeposit = async (req, res) => {
       await wallet.save();
     }
 
-    await deposit.remove();
+    // await deposit.remove();
 
     res.status(200).json({ message: 'سپرده با موفقیت حذف شد' });
   } catch (error) {

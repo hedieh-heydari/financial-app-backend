@@ -92,7 +92,6 @@ exports.deleteWithdrawal = async (req, res) => {
 
   try {
     const userId = await verifyToken(token);
-
     const withdrawal = await Withdrawal.findById(id);
     if (!withdrawal) return res.status(404).json({ message: 'برداشت پیدا نشد' });
 
